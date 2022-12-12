@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -104,14 +105,14 @@ namespace aoc_7
                     UInt64 counted_size = Size;
                     foreach (var pair in Subdirectories)
                     {
-                        counted_size += pair.Value.Size;
+                        counted_size += pair.Value.size_recursive;
                     }
                     return counted_size;
                 }
             }
 
-            public Dictionary<String, Directory> Subdirectories { get; set; }
-            public Dictionary<String, File> Files { get; set; }
+            public Dictionary<string, Directory> Subdirectories { get; set; }
+            public Dictionary<string, File> Files { get; set; }
             public Directory? parent { get; set; }
 
             public Directory(string name, Directory? parent)
@@ -146,59 +147,91 @@ namespace aoc_7
                 var tree = new StringBuilder();
                 foreach (var pair in this.Subdirectories)
                 {
-                    tree.Append(String.Format("dir {0}\n", pair.Value.Name));
+                    tree.Append(string.Format("dir {0}\n", pair.Value.Name));
                 }
                 foreach (var pair in this.Files)
                 {
-                    tree.Append(String.Format("{0,10}\t{1,-0}\n", pair.Value.Size, pair.Value.Name));
+                    tree.Append(string.Format("{0,10}\t{1,-0}\n", pair.Value.Size, pair.Value.Name));
+                }
+                return tree.ToString();
+            }
+
+            public string getTree()
+            {
+                var tree = new StringBuilder();
+                foreach (var pair in this.Subdirectories)
+                {
+                    tree.Append(string.Format("\tdir {0}{1}\n", pair.Value.Name, pair.Value.getTree()));
+                }
+                foreach (var pair in this.Files)
+                {
+                    tree.Append(string.Format("{0,10}\t{1,-0}\n", pair.Value.Size, pair.Value.Name));
                 }
                 return tree.ToString();
             }
         }
 
-        public class PuzzleInput : IEnumerable<string>, IEnumerator<string>
+        public struct ParsedCommand
         {
-            public string Current => throw new NotImplementedException();
-
-            object IEnumerator.Current => "test current";
-
-
-            public void Dispose()
+            public string str = "";
+            public string[] lines;
+            public string cd_to = "";
+            public bool is_ls = false;
+            public List<string> directories = new();
+            public Dictionary<string, ulong> files = new();
+            public ParsedCommand(string str)
             {
+                this.str = str;
+                lines = str.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                var cd = lines[0].Split(' ');
+                if (cd.Length != 3) throw new Exception($"bad command: {cd}");
+                if (cd[0] != "&" & cd[1] != "cd") throw new ArgumentException($"not cd: {cd}");
+                cd_to = cd[2];
+                if (lines.Length < 2) return;
+                is_ls = true;
+                var ls = lines[1].Split(' ');
+                if (ls.Length != 2) return;
+                if (ls[0] != "&" & ls[1] != "ls") throw new ArgumentException($"not ls: {ls}");
+
+                foreach (var line in lines[2..])
+                {
+                    var c = line.Split(' ');
+                    if (c.Length != 2) break;
+                    if (c[0] == "dir")
+                    {
+                        directories.Add(c[1]);
+                    }
+                    else
+                    {
+                        files.Add(c[1], ulong.Parse(c[0]));
+                    }
+                }
             }
 
-            public IEnumerable<string> GetEnumerator()
+            public static List<ParsedCommand> ParseFile(string contents)
             {
-                yield return "test";
-            }
+                var lines = contents.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                var currentCommand = new StringBuilder();
+                var commandAvailable = false;
+                var parsedcommands = new List<ParsedCommand>();
 
-            public bool MoveNext()
-            {
-                throw new NotImplementedException();
-            }
+                foreach (var line in lines)
+                {
+                    if (line.StartsWith("$ cd") | line.Equals(Environment.NewLine, StringComparison.InvariantCulture))
+                    {
+                        if (commandAvailable) parsedcommands.Add(new ParsedCommand(currentCommand.ToString()));
+                        commandAvailable = true;
+                        currentCommand.Clear();
+                        currentCommand.AppendLine(line);
+                        continue;
+                    }
+                    currentCommand.AppendLine(line);
+                }
+                if (commandAvailable) parsedcommands.Add(new ParsedCommand(currentCommand.ToString()));
 
-            public void Reset()
-            {
-                throw new NotImplementedException();
-            }
-
-            IEnumerator<string> IEnumerable<string>.GetEnumerator()
-            {
-                throw new NotImplementedException();
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                throw new NotImplementedException();
+                return parsedcommands;
             }
         }
 
-
-        public static System.Collections.IEnumerable SomeNumbers()
-        {
-            yield return 3;
-            yield return 5;
-            yield return 8;
-        }
     }
 }
