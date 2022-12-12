@@ -5,7 +5,7 @@ using aoc_7;
 var home = new ElFileSystem.Directory("", null);
 
 
-var commands = ElFileSystem.ParsedCommand.ParseFile(File.ReadAllText(@"X:\Coding\advent-of-code\2022\7\csharp\aoc-7\puzzle_input.txt"));
+var commands = ElFileSystem.ParsedCommand.ParseFile(File.ReadAllText(@"..\..\..\puzzle_input.txt"));
 ElFileSystem.Directory cwd = home;
 ElFileSystem.Directory last;
 var first = true;
