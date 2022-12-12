@@ -232,6 +232,5 @@ namespace aoc_7
                 return parsedcommands;
             }
         }
-
     }
 }

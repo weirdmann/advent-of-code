@@ -1,9 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using aoc_7;
-using System.Text;
-using System;
-
 
 var home = new ElFileSystem.Directory("", null);
 
@@ -13,6 +10,8 @@ ElFileSystem.Directory cwd = home;
 ElFileSystem.Directory last;
 var first = true;
 var i = 0;
+
+
 foreach (var command in commands)
 {
     i++;
@@ -48,23 +47,9 @@ foreach (var command in commands)
     }
 }
 
-foreach (var s in home.Subdirectories)
-{
-    // depth first search
-    foreach (var d in s.Value.Subdirectories)
-    {
-
-    }
-}
-
-
-
 var answer = new PuzzleAnswer(home);
 
 Console.WriteLine(answer);
-
-
-
 
 
 
