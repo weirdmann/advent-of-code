@@ -138,7 +138,7 @@ impl Knot {
         if head_tail_difference.x.abs().gt(&1) || head_tail_difference.y.abs().gt(&1) {
             match self.next.as_mut() {
                 Some(next) => {
-                    next.follow(old_head_position, &self.position.clone());
+                    next.follow(&old_head_position.clone(), &self.position.clone());
                 }
                 None => {}
             }
