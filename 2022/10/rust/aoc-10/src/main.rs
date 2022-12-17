@@ -1,14 +1,20 @@
-use std::{collections::HashMap, fs, ops::Deref, result};
+use std::fs;
 
 fn main() {
     let file_path = "puzzle_input.txt";
     let contents = fs::read_to_string(file_path).expect("Should have been able to read the file");
 
     let mut cpu = CPU::new();
+    let mut crt = CRT::new();
     cpu.load_from_str(contents).expect("err");
+
+    for line in crt.request_animation_frame() {
+        println!("{}", line);
+    }
 
     let mut answer1 = 0;
     loop {
+        crt.advance(cpu.register.X);
         match cpu.advance() {
             Some(_) => {
                 println!(
@@ -27,6 +33,10 @@ fn main() {
                 break;
             }
         };
+    }
+
+    for line in crt.request_animation_frame() {
+        println!("{}", line);
     }
 }
 
@@ -70,9 +80,8 @@ impl CPU {
     }
 
     fn advance(&mut self) -> Option<()> {
-        
         self.clock += 1;
-        
+
         if self.program.len().eq(&0) {
             return None;
         }
@@ -99,17 +108,18 @@ impl CPU {
 
     fn next_instruction(&mut self) -> Option<()> {
         match &mut self.program_counter {
-            None => {self.program_counter = Some(0)},
-            Some(a) => {*a += 1;}
+            None => self.program_counter = Some(0),
+            Some(a) => {
+                *a += 1;
+            }
         }
         self.step = 0;
         match self.program.get(self.program_counter.unwrap()).cloned() {
             Some(val) => self.current_instruction = Some(val),
-            None => {return None},
+            None => return None,
         }
 
         Some(())
-
     }
 
     fn load_from_str(&mut self, prog: String) -> Result<&mut Self, String> {
@@ -141,35 +151,73 @@ impl CPU {
 
 #[derive(Clone, Debug)]
 struct Pixel<T> {
-    value: T
+    value: T,
 }
 
 impl<T> Pixel<T> {
-    fn new(v : T) -> Self {
-        Self {value : v}
+    fn new(v: T) -> Self {
+        Self { value: v }
     }
 }
 
-
 struct CRT {
+    width: usize,
+    height: usize,
     frame_buffer: Vec<Pixel<bool>>,
-    sprite_pos: usize
+    current_pixel_idx: isize,
 }
 
 impl CRT {
     fn new() -> Self {
+        const WIDTH: usize = 40;
+        const HEIGHT: usize = 6;
         Self {
-            frame_buffer : Vec::new(),
-            sprite_pos : 0
+            width: WIDTH,
+            height: HEIGHT,
+            frame_buffer: {
+                let mut v = Vec::new();
+                for _ in 1..=(WIDTH * HEIGHT) {
+                    v.push(Pixel::new(false));
+                }
+                v
+            },
+            current_pixel_idx: 0,
         }
     }
 
-    fn request_animation_frame() -> Vec<String> {
-        let animation_frame = Vec::new();
-        let current_line = String::new();
+    fn request_animation_frame(&mut self) -> Vec<String> {
+        let mut animation_frame = Vec::new();
 
+        for i in 1..=self.height {
+            animation_frame.push(String::new());
+        }
 
+        let mut current_line = String::new();
+        let mut idx: usize = 0;
+
+        for (i, pixel) in self.frame_buffer.iter().enumerate() {
+            let char = match pixel.value {
+                true => '#',
+                false => '.',
+            };
+            animation_frame[(i as f32 / self.width as f32).floor() as usize].push(char);
+        }
 
         animation_frame
+    }
+
+    fn reset(&mut self) {
+        self.current_pixel_idx = 0;
+    }
+
+    fn advance(&mut self, sprite_position: isize) {
+        match self.frame_buffer.get_mut(self.current_pixel_idx as usize) {
+            Some(pixel) => {
+                pixel.value = (self.current_pixel_idx % self.width as isize) >= sprite_position
+                    && (self.current_pixel_idx % self.width as isize) <= sprite_position + 2
+            }
+            None => {}
+        }
+        self.current_pixel_idx += 1;
     }
 }
