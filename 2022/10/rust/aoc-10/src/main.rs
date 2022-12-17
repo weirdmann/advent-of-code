@@ -12,7 +12,7 @@ fn main() {
         match cpu.advance() {
             Some(_) => {
                 println!(
-                    "clk:{:?}, instr:{:?}:{:?}, regX: {:?}",
+                    "clk: {:4?}, instr: {:?}, step: {:?}, regX: {:?}",
                     cpu.clock, cpu.current_instruction, cpu.step, cpu.register.X
                 );
                 match cpu.clock {
@@ -136,5 +136,40 @@ impl CPU {
         self.program.append(&mut self.new_program);
 
         Ok(self)
+    }
+}
+
+#[derive(Clone, Debug)]
+struct Pixel<T> {
+    value: T
+}
+
+impl<T> Pixel<T> {
+    fn new(v : T) -> Self {
+        Self {value : v}
+    }
+}
+
+
+struct CRT {
+    frame_buffer: Vec<Pixel<bool>>,
+    sprite_pos: usize
+}
+
+impl CRT {
+    fn new() -> Self {
+        Self {
+            frame_buffer : Vec::new(),
+            sprite_pos : 0
+        }
+    }
+
+    fn request_animation_frame() -> Vec<String> {
+        let animation_frame = Vec::new();
+        let current_line = String::new();
+
+
+
+        animation_frame
     }
 }
