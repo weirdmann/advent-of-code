@@ -17,8 +17,8 @@ fn main() {
     business.monkeys.push(Monkey::new(
         Vec::from([99, 67, 92, 61, 83, 64, 98]),
         Box::new(|old| {
-            // let new = ((old as f64 * 17f64) / 3f64).floor() as usize;
-            let new = (old as u128 * 17) as usize;
+            // let new = ((old as f64 * 17f64) / 3f64).floor() as u128;
+            let new = old  * 17;
             (
                 match new % 3 {
                     0 => 4,
@@ -33,8 +33,8 @@ fn main() {
     business.monkeys.push(Monkey::new(
         Vec::from([78, 74, 88, 89, 50]),
         Box::new(|old| {
-            // let new = ((old as f64 * 11f64) / 3f64).floor() as usize;
-            let new =( old as u128 * 11 ) as usize;
+            // let new = ((old as f64 * 11f64) / 3f64).floor() as u128;
+            let new = old  * 11;
             (
                 match new % 5 {
                     0 => 3,
@@ -49,8 +49,8 @@ fn main() {
     business.monkeys.push(Monkey::new(
         Vec::from([98, 91]),
         Box::new(|old| {
-            // let new = ((old as f64 + 4f64) / 3f64).floor() as usize;
-            let new = old + 4;
+            // let new = ((old as f64 + 4f64) / 3f64).floor() as u128;
+            let new = (old as f64 + 4f64) as u128;
             (
                 match new % 2 {
                     0 => 6,
@@ -65,7 +65,8 @@ fn main() {
     business.monkeys.push(Monkey::new(
         Vec::from([59, 72, 94, 91, 79, 88, 94, 51]),
         Box::new(|old| {
-            let new = (old as u128 * old as u128) as usize;
+            let new = (old as f64 * old as f64) as u128;
+            println!("{} -> {}", old, new);
             (
                 match new % 13 {
                     0 => 0,
@@ -80,7 +81,7 @@ fn main() {
     business.monkeys.push(Monkey::new(
         Vec::from([95, 72, 78]),
         Box::new(|old| {
-            let new = old + 7;
+            let new = (old as f64 + 7f64) as u128;
             (
                 match new % 11 {
                     0 => 7,
@@ -159,13 +160,13 @@ fn main() {
 }
 
 struct Monkey {
-    items: Queue<usize>,
-    operation: Box<dyn Fn(usize) -> (usize, usize)>,
+    items: Queue<u128>,
+    operation: Box<dyn Fn(u128) -> (u128, u128)>,
     inspection_count: u64,
 }
 
 impl Monkey {
-    fn new(items: Vec<usize>, op: Box<dyn Fn(usize) -> (usize, usize)>) -> Self {
+    fn new(items: Vec<u128>, op: Box<dyn Fn(u128) -> (u128, u128)>) -> Self {
         Self {
             items: {
                 let mut q = Queue::new();
@@ -188,8 +189,8 @@ struct MonkeyBusiness {
 impl MonkeyBusiness {
     fn round(&mut self) {
         let monkeys_amount: usize = self.monkeys.len();
-        let mut for_monkey: Vec<Queue<usize>> = {
-            let mut zero_vec: Vec<Queue<usize>> = Vec::with_capacity(monkeys_amount);
+        let mut for_monkey: Vec<Queue<u128>> = {
+            let mut zero_vec: Vec<Queue<u128>> = Vec::with_capacity(monkeys_amount);
             for _ in 0..monkeys_amount {
                 zero_vec.push(Queue::new());
             }
@@ -206,7 +207,7 @@ impl MonkeyBusiness {
                             for_monkey[index as usize]
                                 .add(item)
                                 .expect("error adding an item");
-                            //self.monkeys.get_mut((monkey.operation)(item) as usize).unwrap().items.add(item).expect("error adding an item");
+                            //self.monkeys.get_mut((monkey.operation)(item) as u128).unwrap().items.add(item).expect("error adding an item");
                         }
                         Err(_) => break,
                     }
