@@ -1,11 +1,10 @@
 extern crate queues;
-
+extern crate  num_bigint;
 use queues::*;
+use num_bigint::BigUint;
+//use num_traits::{Zero};
 //use std::{rc::Rc};
 
-fn got_bored(item : isize) -> isize {
-    (item as f64 / 3f64).floor() as isize
-}
 
 fn main() {
     println!("Hello, world!");
@@ -15,13 +14,20 @@ fn main() {
     };
     // 0
     business.monkeys.push(Monkey::new(
-        Vec::from([99, 67, 92, 61, 83, 64, 98]),
+            Vec::from([BigUint::from(99u32),
+                       BigUint::from(67u32),
+                       BigUint::from(92u32),
+                       BigUint::from(61u32),
+                       BigUint::from(83u32),
+                       BigUint::from(64u32),
+                       BigUint::from(98u32)
+                       ]),
         Box::new(|old| {
             // let new = ((old as f64 * 17f64) / 3f64).floor() as u128;
-            let new = old  * 17;
+            let new = old * 17u32;
             (
-                match new % 3 {
-                    0 => 4,
+                    match (&new % BigUint::from(3u32)).to_string().eq("0") {
+                    true => 4,
                     _ => 2,
                 },
                 new,
@@ -31,13 +37,17 @@ fn main() {
 
     // 1
     business.monkeys.push(Monkey::new(
-        Vec::from([78, 74, 88, 89, 50]),
+            Vec::from([BigUint::from(78u32),
+                       BigUint::from(74u32),
+                       BigUint::from(88u32),
+                       BigUint::from(89u32),
+                       BigUint::from(50u32)]),
         Box::new(|old| {
             // let new = ((old as f64 * 11f64) / 3f64).floor() as u128;
-            let new = old  * 11;
+            let new = old * 11u32;
             (
-                match new % 5 {
-                    0 => 3,
+                    match (&new % BigUint::from(5u32)).to_string().eq("0") {
+                        true => 3,
                     _ => 5,
                 },
                 new,
@@ -47,13 +57,13 @@ fn main() {
 
     // 2
     business.monkeys.push(Monkey::new(
-        Vec::from([98, 91]),
+            Vec::from([BigUint::from(98u32), BigUint::from(91u32)]),
         Box::new(|old| {
             // let new = ((old as f64 + 4f64) / 3f64).floor() as u128;
-            let new = (old as f64 + 4f64) as u128;
+            let new = old + 4u32;
             (
-                match new % 2 {
-                    0 => 6,
+                    match (&new % BigUint::from(2u32)).to_string().eq("0") {
+                        true => 6,
                     _ => 4,
                 },
                 new,
@@ -63,13 +73,19 @@ fn main() {
 
     // 3
     business.monkeys.push(Monkey::new(
-        Vec::from([59, 72, 94, 91, 79, 88, 94, 51]),
+            Vec::from([BigUint::from(59u32),
+                       BigUint::from(72u32),
+                       BigUint::from(94u32),
+                       BigUint::from(91u32),
+                       BigUint::from(79u32),
+                       BigUint::from(88u32),
+                       BigUint::from(94u32),
+                       BigUint::from(51u32)]),
         Box::new(|old| {
-            let new = (old as f64 * old as f64) as u128;
-            println!("{} -> {}", old, new);
+            let new = &old * &old;
             (
-                match new % 13 {
-                    0 => 0,
+                    match (&new % BigUint::from(13u32)).to_string().eq("0") {
+                        true => 0,
                     _ => 5,
                 },
                 new,
@@ -79,12 +95,12 @@ fn main() {
 
     // 4
     business.monkeys.push(Monkey::new(
-        Vec::from([95, 72, 78]),
+            Vec::from([BigUint::from(95u32), BigUint::from(72u32), BigUint::from(78u32)]),
         Box::new(|old| {
-            let new = (old as f64 + 7f64) as u128;
+            let new = old + 7u32;
             (
-                match new % 11 {
-                    0 => 7,
+                    match (&new % BigUint::from(11u32)).to_string().eq("0") {
+                        true => 7,
                     _ => 6,
                 },
                 new,
@@ -94,12 +110,12 @@ fn main() {
 
     // 5
     business.monkeys.push(Monkey::new(
-        Vec::from([76]),
+            Vec::from([BigUint::from(76u32)]),
         Box::new(|old| {
-            let new = old + 8;
+            let new = old + 8u32;
             (
-                match new % 17 {
-                    0 => 0,
+                    match (&new % BigUint::from(17u32)).to_string().eq("0") {
+                        true => 0,
                     _ => 2,
                 },
                 new,
@@ -109,12 +125,17 @@ fn main() {
 
     // 6
     business.monkeys.push(Monkey::new(
-        Vec::from([69, 60, 53, 89, 71, 88]),
+            Vec::from([BigUint::from(69u32),
+                       BigUint::from(60u32),
+                       BigUint::from(53u32),
+                       BigUint::from(89u32),
+                       BigUint::from(71u32),
+                       BigUint::from(88u32)]),
         Box::new(|old| {
-            let new = old  + 5;
+            let new = old + 5u32;
             (
-                match new % 19 {
-                    0 => 7,
+                    match (&new % BigUint::from(19u32)).to_string().eq("0") {
+                    true => 7,
                     _ => 1,
                 },
                 new,
@@ -124,20 +145,23 @@ fn main() {
 
     // 7
     business.monkeys.push(Monkey::new(
-        Vec::from([72, 54, 63, 80]),
+            Vec::from([BigUint::from(72u32),
+                       BigUint::from(54u32),
+                       BigUint::from(63u32),
+                       BigUint::from(80u32)]),
         Box::new(|old| {
-            let new = old + 3;
+            let new = old + 3u32;
             (
-                match new % 7 {
-                    0 => 1,
-                    _ => 3,
+                    match (&new % BigUint::from(7u32)).to_string().eq("0") {
+                        true => 1,
+                        _ => 3,
                 },
                 new,
             )
         }),
     ));
 
-    for _ in 0..10000 {
+    for _ in 0..200 {
         business.round();
     }
     let mut max = 0;
@@ -160,13 +184,13 @@ fn main() {
 }
 
 struct Monkey {
-    items: Queue<u128>,
-    operation: Box<dyn Fn(u128) -> (u128, u128)>,
+    items: Queue<BigUint>,
+    operation: Box<dyn Fn(BigUint) -> (u128, BigUint)>,
     inspection_count: u64,
 }
 
 impl Monkey {
-    fn new(items: Vec<u128>, op: Box<dyn Fn(u128) -> (u128, u128)>) -> Self {
+    fn new(items: Vec<BigUint>, op: Box<dyn Fn(BigUint) -> (u128, BigUint)>) -> Self {
         Self {
             items: {
                 let mut q = Queue::new();
@@ -189,8 +213,8 @@ struct MonkeyBusiness {
 impl MonkeyBusiness {
     fn round(&mut self) {
         let monkeys_amount: usize = self.monkeys.len();
-        let mut for_monkey: Vec<Queue<u128>> = {
-            let mut zero_vec: Vec<Queue<u128>> = Vec::with_capacity(monkeys_amount);
+        let mut for_monkey: Vec<Queue<BigUint>> = {
+            let mut zero_vec: Vec<Queue<BigUint>> = Vec::with_capacity(monkeys_amount);
             for _ in 0..monkeys_amount {
                 zero_vec.push(Queue::new());
             }
