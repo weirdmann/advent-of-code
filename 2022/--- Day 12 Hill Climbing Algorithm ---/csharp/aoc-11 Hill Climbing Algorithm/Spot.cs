@@ -63,6 +63,7 @@ public class AStarMap
         Columns = cols;
         Rows = rows;
 
+        Spots = new();
         for (var x = 0; x < cols; x++)
         {
             for (var y = 0; y < rows; y++)
@@ -73,8 +74,26 @@ public class AStarMap
             }
         }
 
-        
 
+        OpenSet = new();
+        StartSpot = Spots.GetValueOrDefault(StartPosition) ?? throw new InvalidOperationException();
+        EndSpot = Spots.GetValueOrDefault(EndPosition) ?? throw new InvalidOperationException();
+        StartSpot.G = 0;
+        AddToOpenSet(StartSpot);
+    }
+
+    public void ReInit(Position start, Position end)
+    {
+        StartPosition = start;
+        EndPosition = end;
+
+        foreach (var spot in Spots.Values)
+        {
+            spot.G = int.MaxValue;
+            spot.F = int.MaxValue;
+            spot.Previous = null;
+        }
+        
         OpenSet = new();
         StartSpot = Spots.GetValueOrDefault(StartPosition) ?? throw new InvalidOperationException();
         EndSpot = Spots.GetValueOrDefault(EndPosition) ?? throw new InvalidOperationException();
@@ -97,7 +116,7 @@ public class AStarMap
                 {
                     potentialNeighbor = Spots.GetValueOrDefault(new Position() { X = x + 1, Y = y }) ??
                                         throw new InvalidOperationException();
-                    if (potentialNeighbor.HeightNumeric <= s.HeightNumeric + 1 | potentialNeighbor.HeightChar == 'E')
+                    if (potentialNeighbor.HeightNumeric <= s.HeightNumeric + 1 )
                         s.Neighbors.Add(potentialNeighbor);
                 }
 
@@ -105,7 +124,7 @@ public class AStarMap
                 {
                     potentialNeighbor = Spots.GetValueOrDefault(new Position() { X = x - 1, Y = y }) ??
                                         throw new InvalidOperationException();
-                    if (potentialNeighbor.HeightNumeric <= s.HeightNumeric + 1 | potentialNeighbor.HeightChar == 'E')
+                    if (potentialNeighbor.HeightNumeric <= s.HeightNumeric + 1 )
                         s.Neighbors.Add(potentialNeighbor);
                 }
 
@@ -113,7 +132,7 @@ public class AStarMap
                 {
                     potentialNeighbor = Spots.GetValueOrDefault(new Position() { X = x, Y = y + 1 }) ??
                                         throw new InvalidOperationException();
-                    if (potentialNeighbor.HeightNumeric <= s.HeightNumeric + 1 | potentialNeighbor.HeightChar == 'E')
+                    if (potentialNeighbor.HeightNumeric <= s.HeightNumeric + 1 )
                         s.Neighbors.Add(potentialNeighbor);
                 }
 
@@ -121,7 +140,7 @@ public class AStarMap
                 {
                     potentialNeighbor = Spots.GetValueOrDefault(new Position() { X = x, Y = y - 1 }) ??
                                         throw new InvalidOperationException();
-                    if (potentialNeighbor.HeightNumeric <= s.HeightNumeric + 1 | potentialNeighbor.HeightChar == 'E')
+                    if (potentialNeighbor.HeightNumeric <= s.HeightNumeric + 1 )
                         s.Neighbors.Add(potentialNeighbor);
                 }
             }
@@ -159,8 +178,6 @@ public class AStarMap
             if (start is null || end is null) throw new InvalidDataException();
 
             Init(cols, rows, (Position)start, (Position)end);
-            
-            
         }
 
 
@@ -172,9 +189,11 @@ public class AStarMap
                               throw new InvalidDataException();
 
                 current.HeightChar = split[y][x];
+                current.CalculateAppearance();
+                current.H = Heuristic(current);
             }
         }
-        
+
         AddNeighbors();
     }
 
@@ -183,11 +202,11 @@ public class AStarMap
         var path = new Queue<Spot>();
         var current = lastSpot;
 
-        foreach (KeyValuePair<Position, Spot> spot in Spots)
+        foreach (var spot in Spots.Values)
         {
-            spot.Value.IsPath = false;
+            spot.IsPath = false;
         }
-        
+
         current.IsPath = true;
 
         while (current.Previous is not null)
@@ -209,7 +228,7 @@ public class AStarMap
             {
                 Finished = true,
                 Success = false,
-                Path = null
+                lastSpot = null
             };
         }
 
@@ -223,7 +242,7 @@ public class AStarMap
             {
                 Finished = true,
                 Success = true,
-                Path = ReconstructPath(currentSpot)
+                lastSpot = currentSpot
             };
         }
 
@@ -235,7 +254,7 @@ public class AStarMap
             // this is a better path
             neighbor.Previous = currentSpot;
             neighbor.G = score;
-            neighbor.F = score + Heuristic(neighbor);
+            neighbor.F = score + neighbor.H;
 
             var exists = false;
             foreach (var (element, p) in OpenSet.UnorderedItems)
@@ -258,32 +277,63 @@ public class AStarMap
         {
             Finished = false,
             Success = false,
-            Path = ReconstructPath(currentSpot)
+            lastSpot = currentSpot
         };
-        
-        
+    }
+
+    public void SolvePart2()
+    {
+        var As = from s in Spots.Values where s.HeightChar == 'a' select s;
+
+        var shortest = int.MaxValue;
+        foreach (var spot in As.OrderBy((s) => s.H))
+        {
+            ReInit(spot.Position, EndPosition);
+            Result result;
+            while (true)
+            {
+                result = Main();
+
+                if (result.Finished)
+                {
+                    if (result.Success)
+                    {
+                        shortest = Math.Min(shortest, EndSpot.G);
+                        
+                    }
+                    break;
+                }
+            }
+        }
+        ReconstructPath(EndSpot);
+        Console.SetCursorPosition(0,0);
+        Console.WriteLine($"{Visualize()}");
+        Console.WriteLine($"Part2: {shortest}");
     }
 
     public int Heuristic(Spot s)
     {
-        return (int)Math.Sqrt((Math.Pow(s.Position.X - EndPosition.X, 2) + Math.Pow(s.Position.Y - EndPosition.Y, 2)));
+        //return Math.Abs(s.Position.X - EndPosition.X) + Math.Abs(s.Position.Y - EndPosition.Y);
+        return (int)Math.Sqrt(Math.Pow(s.Position.X - EndPosition.X, 2) + Math.Pow(s.Position.Y - EndPosition.Y, 2));
     }
-    
+
     public String Visualize()
     {
         var sb = new StringBuilder();
         var line = new StringBuilder();
-
+        const string pathColor = "\u001b[42;1m";
+        const string bgColor = "\u001b[30;1m";
+        const string reset = "\u001b[0m";
+        //Spot s;
         for (var y = 0; y < Rows; y++)
         {
             for (var x = 0; x < Columns; x++)
             {
-                var s = Spots.GetValueOrDefault(new Position() { X = x, Y = y }) ??
-                        throw new InvalidOperationException($"x:{x}, y:{y}");
-                var c = s.HeightChar.ToString();
-                if (s.IsPath) c = " ";//c = s.HeightChar.ToString().ToUpper();
-                line.Append(c);
-                //line.Append(' ');
+                // s = (Spots.GetValueOrDefault(new Position() { X = x, Y = y }) ??
+                //     throw new InvalidOperationException($"x:{x}, y:{y}")).appearance;
+                //
+                line.Append((Spots.GetValueOrDefault(new Position() { X = x, Y = y }) ??
+                             throw new InvalidOperationException($"x:{x}, y:{y}")).appearance);
             }
 
             line.Append('\n');
@@ -298,14 +348,25 @@ public class AStarMap
     {
         public bool Finished;
         public bool Success;
-        public Queue<Spot>? Path;
+        public Spot? lastSpot;
     }
 }
 
 public class Spot
 {
     public char HeightChar = 's';
-    public uint HeightNumeric => HeightChar.ToString().ToLower()[0];
+    public uint HeightNumeric
+    {
+        get
+        {
+            return HeightChar switch
+            {
+                'S' => 'a',
+                'E' => 'z',
+                _ => HeightChar.ToString().ToLower()[0]
+            };
+        }
+    }
 
     public bool IsPath = false;
 
@@ -316,6 +377,18 @@ public class Spot
     public int G = int.MaxValue;
 
     public int H = int.MaxValue;
+
+    public string appearance
+    {
+        get
+        {
+            if (this.IsPath) return pathAppearance;
+            return defaultAppearance;
+        }
+    }
+
+    public string defaultAppearance;
+    public string pathAppearance;
 
     private int _h;
     private bool _updateH;
@@ -329,5 +402,21 @@ public class Spot
         _updateH = true;
 
         Neighbors = new List<Spot>();
+    }
+
+    public void CalculateAppearance()
+    {
+        defaultAppearance =
+            $"\u001b[48;5;{map((int)this.HeightNumeric, 'g', 'z', 232, 255)}m" +
+            $"\u001b[38;5;{map((int)this.HeightNumeric, 'a', 'o', 235, 255)}m" +
+            $"{this.HeightChar}\u001b[0m";
+        pathAppearance = $"\u001b[42m\u001b[32;1m{this.HeightChar}\u001b[0m";
+    }
+
+    public static int map(int X, int A, int B, int C, int D)
+    {
+        if (X >= B) return D;
+        if (X <= A) return C;
+        return (int)((float)(X - A) / (float)(B - A) * (D - C) + C);
     }
 }
