@@ -86,16 +86,16 @@ public struct Packet
         var memory = new StringBuilder();
         while (currentLine.Length > 0)
         {
+            var addNewLine = false;
             var currentChar = currentLine[0];
             currentLine = currentLine.Remove(0, 1);
-            memory.Append(currentChar);
             switch (currentChar)
             {
                 case OPENING:
                     if (!lookingForClosing)
                     {
                         lookingForClosing = true;
-                        memory.Append(Environment.NewLine);
+                        addNewLine = true;
                     }
                     else
                     {
@@ -108,22 +108,26 @@ public struct Packet
                         Console.WriteLine("unmatchad parent");
                         break;
                     }
-                    
+
                     foundOpened -= 1;
                     switch (foundOpened)
                     {
                         case 0:
-                            memory.Append(Environment.NewLine);
+                            //memory.Append(Environment.NewLine);
                             break;
                         case -1:
                             lookingForClosing = false;
                             foundOpened = 0;
+                            memory.Append(Environment.NewLine);
                             break;
                     }
                     break;
+                
             }
+            memory.Append(currentChar);
+            if (addNewLine) memory.Append(Environment.NewLine);
         }
-        Console.WriteLine(memory.ToString());
+        Console.WriteLine($"{line}:\n{memory}\n");
         return memory.ToString();
     }
 }
