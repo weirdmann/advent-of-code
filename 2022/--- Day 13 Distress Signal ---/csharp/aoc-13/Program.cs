@@ -1,14 +1,14 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using System.Collections;
-
 Console.WriteLine("Hello, World!");
 
-var a = new List<int>(){ 1, 2, 3 };
-var b = new List<int>(){ 1, 2, 3 };
+var firstPass = Packet.Element.ParseFromString("[1,2,3,4]");
 
-var firstPass = Packet.ParseSinglePacket("[[[[],1,2],[[7,7,7],6,[1,7,1]]],[4,8],[]]");
-var split = firstPass.Split(Environment.NewLine);
-Packet.ParseSinglePacket(split[1]);
+Packet.Element.ParseFromString("1,2,3,4");
 
-Packet.ParseSinglePacket("1,2,3,4");
+var e1 = Packet.Element.FromString("[]");
+var e2 = Packet.Element.FromString("1");
+var e3 = Packet.Element.FromString("[1,2,3,4]");
+var e4 = Packet.Element.FromString("[1,[2,3],4]");
+
+Console.WriteLine();
