@@ -70,9 +70,9 @@ impl CPU {
     }
 
     fn advance(&mut self) -> Option<()> {
-        
+
         self.clock += 1;
-        
+
         if self.program.len().eq(&0) {
             return None;
         }
