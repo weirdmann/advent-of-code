@@ -400,3 +400,6 @@
 
 # JetBrains Rider
 **/csharp/**/*.sln.iml
+
+# JetBrains Fleet
+**/.fleet
