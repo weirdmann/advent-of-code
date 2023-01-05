@@ -21,7 +21,7 @@ sw.Start();
 while (true)
 {
     result = map.Main();
-    if (pass % 500 == 0 && result.lastSpot is not null && false)
+    if (pass % 100 == 0 && result.lastSpot is not null && false)
     {
         map.ReconstructPath(result.lastSpot);
         Console.SetCursorPosition(0, 0);
