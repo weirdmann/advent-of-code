@@ -81,7 +81,7 @@ public struct Packet
             var currentChar = '\0';
             var result = new StringBuilder();
             var bracketStack = new Stack<int>();
-            var commaStack = new Stack<(int,int)>();
+            var commaStack = new Stack<(int, int)>();
             var index = 0;
             var addNewLine = false;
             while (currentLine.Length > 0)
@@ -168,3 +168,4 @@ public struct Packet
 
 
 }
+
